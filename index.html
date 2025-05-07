@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Special+Gothic+Expanded+One&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wheel Of (mis)fortune</title>
+
+    <style>
+      :root {
+        --white: #f4f4f4;
+        --light-gray: #e3e3e3;
+        --gray: #222;
+        --dark-gray: #000;
+        --light-blue: #4ecdc4;
+        --dark-blue: #0c0d10;
+        --digit-pink: #ca6580;
+        --digit-blue: #4ecdc4;
+        --digit-yellow: #c9a067;
+      }
+
+      body {
+        margin: 0 auto;
+        font-family: 'Special Gothic Expanded One', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 600px;
+        height: 100vh;
+        background: #0c0d10 url('/src/assets/images/Digit_background_curves.svg') no-repeat center
+          center;
+        background-size: cover;
+        overflow: hidden;
+      }
+
+      .header-container {
+        position: absolute;
+        top: 10px;
+        text-align: center;
+        color: #ffffff;
+        font-size: auto;
+        text-shadow: 0 0 20px #000;
+      }
+
+      .wheel-container {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        max-width: 800px;
+        aspect-ratio: 1 / 1.2;
+      }
+
+      .wheel {
+        position: absolute;
+        width: 90%;
+        margin: 5%;
+        aspect-ratio: 1 / 1;
+        border-radius: 50%;
+        overflow: hidden;
+        transform: rotate(22.5deg);
+        transition: transform 3s cubic-bezier(0.17, 1.34, 0.59, 1);
+        background: conic-gradient(
+          var(--light-gray) 0deg 45deg,
+          var(--white) 45deg 90deg,
+          var(--light-gray) 90deg 135deg,
+          var(--white) 135deg 180deg,
+          var(--light-gray) 180deg 225deg,
+          var(--white) 225deg 270deg,
+          var(--light-gray) 270deg 315deg,
+          var(--white) 315deg 360deg
+        );
+        box-shadow:
+          0 0 0 10px var(--digit-yellow) inset,
+          0 0 30px var(--digit-yellow);
+        z-index: 2;
+      }
+
+      .label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: rotate(calc(var(--i) * 45deg + 11.25deg)) translateX(-260%) rotate(-80deg);
+        transform-origin: 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        font-size: 3rem;
+        font-weight: bold;
+        color: #222;
+        white-space: nowrap;
+        text-align: left;
+        pointer-events: none;
+      }
+
+      .spin-button {
+        position: absolute;
+        top: 42%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(145deg, #ffffff, #c5c5c5);
+        border: 2px solid var(--digit-yellow);
+        font-family: 'Special Gothic Expanded One', sans-serif;
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        font-size: 1.2rem;
+        color: var(--digit-yellow);
+        cursor: pointer;
+        box-shadow: 0 0px 20px rgba(0, 0, 0, 0.25);
+        z-index: 5;
+        -webkit-tap-highlight-color: transparent;
+        transition: all 0.2s ease-in-out;
+        touch-action: manipulation;
+      }
+
+      .spin-button.pressed {
+        background: var(--digit-yellow);
+        color: white;
+        box-shadow: 0 0px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .popup {
+        position: fixed;
+        min-width: 60%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        background: white;
+        padding: 30px 50px;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        font-size: 24px;
+        color: #333;
+        text-align: center;
+        z-index: 999;
+        transition:
+          transform 0.4s ease-out,
+          opacity 0.4s ease-out;
+        opacity: 0;
+      }
+
+      .popup #popup-label {
+        font-weight: bold;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        color: var(--dark-blue);
+      }
+      .popup #popup-text {
+        font-size: 1.4rem;
+        font-family: notosans, sans-serif;
+        font-weight: normal;
+        margin-bottom: 20px;
+        color: #222;
+      }
+
+      .popup button {
+        font-weight: bold;
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 1rem;
+        background-color: var(--white);
+        color: #222;
+        border: 2px solid var(--digit-yellow);
+        box-shadow: 0 0px 8px var(--digit-yellow);
+        border-color: #c9a067;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .popup.show {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header-container">
+      <h1>
+        WHEEL <br />
+        OF <br />
+        (MIS)FORTUNE
+      </h1>
+    </div>
+
+    <div class="wheel-container">
+      <div class="wheel" id="wheel">
+        <div class="label" style="--i: 8">🧑‍🦯</div>
+        <div class="label" style="--i: 7">🦅</div>
+        <div class="label" style="--i: 6">🤝</div>
+        <div class="label" style="--i: 5">🤠</div>
+        <div class="label" style="--i: 4">🥴</div>
+        <div class="label" style="--i: 3">🧑‍💻</div>
+        <div class="label" style="--i: 2">⚔️</div>
+        <div class="label" style="--i: 1">🪲</div>
+      </div>
+      <button class="spin-button" onclick="spin()">SPIN</button>
+    </div>
+
+    <div class="popup" id="popup">
+      <div id="popup-label"></div>
+      <div id="popup-text"></div>
+      <button id="popup-close">Done ✔️</button>
+    </div>
+
+    <script>
+      const wheel = document.getElementById('wheel')
+      const popup = document.getElementById('popup')
+      const popupLabel = document.getElementById('popup-label')
+      const popupText = document.getElementById('popup-text')
+      const popupClose = document.getElementById('popup-close')
+      const button = document.querySelector('.spin-button')
+      const labels = [
+        '🪲 Feature not a bug',
+        '🧑‍🦯 Blindshot!',
+        '🦅 Sniper',
+        '🤝 Persuasion 500',
+        '🤠 Yoink!',
+        '🥴 Am I drunk?',
+        '🧑‍💻 Sudo rights',
+        '⚔️ For the king!',
+      ]
+
+      const texts = [
+        'On this turn, <b>you may legally strike your opponent’s ball first</b> — including the 8-ball.',
+        'Take the shot with your <b> eyes closed </b> — or maintain eye contact with someone charming nearby.',
+        'Your shot must cause the cue ball to <b>rebound off the edge</b> before contacting any other ball.',
+        'Give a <b> 5-second motivational speech to the cue ball </b>before taking the shot.',
+        'You may <b>reposition one of your opponent’s balls </b>to any spot on the table.',
+        'Shoot with your <b>non-dominant hand</b>.', // Vahetada välja
+        '<b>Place the cue ball anywhere you wish</b> on the table before your shot.',
+        'Take your next shot<b> holding the cue with both hands</b>, as if wielding a spear or a lightsaber.',
+      ]
+
+      let currentRotation = 22.5 // initial rotation to align with the first label
+      let spinResult = 0
+
+      let spinning = false
+      const sliceDeg = 360 / labels.length
+
+      function spin() {
+        if (spinning) return
+        spinning = true
+
+        button.classList.add('pressed')
+
+        randomSliceAddition = Math.floor(Math.random() * labels.length) // 0-7
+        spinResult = (spinResult + randomSliceAddition) % labels.length // 0-7 + 2
+        let spinLabel = labels[spinResult] // 0-7
+        let spinText = texts[spinResult] // 0-7
+
+        let additionalRotation = 10 * 360 + randomSliceAddition * sliceDeg // 2 * 45
+        currentRotation += additionalRotation // accumulate rotation
+
+        wheel.style.transform = `rotate(${currentRotation}deg)`
+
+        setTimeout(() => {
+          showPopup(spinLabel, spinText)
+          spinning = false
+        }, 3000)
+      }
+
+      function showPopup(label, text) {
+        popupLabel.innerHTML = `${label}`
+        popupText.innerHTML = `${text}`
+        popup.classList.add('show')
+        button.classList.remove('pressed')
+      }
+
+      popupClose.addEventListener('click', () => {
+        popup.classList.remove('show')
+      })
+    </script>
+  </body>
+</html>
